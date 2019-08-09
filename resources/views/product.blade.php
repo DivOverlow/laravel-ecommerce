@@ -19,16 +19,38 @@
     </div> <!-- end breadcrumbs -->
 
     <div class="product-section container">
-        <div class="product-section-image">
-            <img src="{{ asset('img/products/'.$product->slug.'.jpg') }}" alt="product">
+        <div>
+            <div class="product-section-image">
+{{--                <img src="{{ productImage($product->image) }}" alt="product">--}}
+                <img src="{{ Voyager::image($product->image) }}" alt="product" class="active" id="currentImage">
+                {{--            <img src="{{ asset('storage/'.$product->image) }}" alt="product">--}}
+                {{--            <img src="{{ asset('img/products/'.$product->slug.'.jpg') }}" alt="product">--}}
+            </div>
+            <div class="product-section-images">
+{{--                <div class="product-section-thumbnail selected">--}}
+{{--                    <img src="{{ asset('img/no_image.png') }}" alt="product">--}}
+{{--                </div>--}}
+                <div class="product-section-thumbnail selected">
+                    <img src="{{Voyager::image($product->image)}}" alt="product">
+                </div>
+
+                @if ($product->images)
+                    @foreach(json_decode($product->images, true) as $image)
+                    <div class="product-section-thumbnail">
+                        <img src="{{ Voyager::image($image) }}" alt="product">
+{{--                        <img src="{{ productImage($image) }}" alt="product">--}}
+                    </div>
+                    @endforeach
+                @endif
+            </div>
         </div>
         <div class="product-section-information">
             <h1 class="product-section-title">{{ $product->name }}</h1>
-            <div class="product-section-subtitle">{{ $product->details }}</div>
+            <div class="product-section-subtitle">{!! $product->details !!}</div>
             <div class="product-section-price">{{ $product->presentPrice() }}</div>
 
             <p>
-                {{ $product->description }}
+                {!! $product->description !!}
             </p>
 
             <p>&nbsp;</p>
@@ -45,5 +67,30 @@
 
     @include('partials.might-like')
 
+@endsection
 
+@section('extra-js')
+    <script>
+        (function () {
+            const currentImage = document.querySelector('#currentImage');
+            const images = document.querySelectorAll('.product-section-thumbnail');
+
+            images.forEach((element) => element.addEventListener('click', thumbnailClick));
+
+            function thumbnailClick(e) {
+                // currentImage.src = this.querySelector('img').src;
+
+                currentImage.classList.remove('active');
+
+                currentImage.addEventListener('transitionend', () => {
+                    currentImage.src = this.querySelector('img').src;
+                    currentImage.classList.add('active');
+                });
+
+                images.forEach((element) => element.classList.remove('selected'));
+                this.classList.add('selected');
+
+            }
+        })();
+    </script>
 @endsection

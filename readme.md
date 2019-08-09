@@ -71,6 +71,11 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
+ git init
+ git status
+ 
+
+
 1. php artisan make:model Product -m
    php artisan migrate
    php artisan make:seed ProductsTableSeeder
@@ -105,4 +110,23 @@ The Laravel framework is open-source software licensed under the [MIT license](h
    php artisan migrate:refresh --seed
    https://www.youtube.com/redirect?redir_token=zdBiFCluk4Tx9UyN-Lz9lJombQd8MTU2NDU4ODI0OEAxNTY0NTAxODQ4&v=N9U4FYLBEiQ&q=https%3A%2F%2Fadamwathan.me%2F2015%2F09%2F03%2Fpushing-polymorphism-to-the-database%2F&event=video_description   
    php artisan make:controller CouponsController -r
-   
+ 
+10. composer dumpautoload
+    php artisan migrate:fresh --seed
+https://laravelvoyager.com/
+    php artisan make:model CategoryProduct
+      
+12. php artisan make:migration add_image_to_products_table
+    php artisan migrate
+    php artisan make:migration add_images_to_products_table
+    php artisan migrate
+    
+    
+13. php artisan make:auth
+
+17. php artisan make:command EcommerceInstall
+    php artisan ecommerce:install
+    composer dump-autoload
+    php artisan ecommerce:install
+        (or)
+    php artisan ecommerce:install --force
