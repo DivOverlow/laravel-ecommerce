@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
+use App\Mail\OrderPlaced;
+use App\Order;
+use App\OrderProduct;
 use Cart;
 use Cartalyst\Stripe\Exception\CardErrorException;
 use Cartalyst\Stripe\Laravel\Facades\Stripe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -73,13 +77,20 @@ class CheckoutController extends Controller
                 ],
             ]);
 
+            $order = $this->addToOrdersTables($request);
+//            Mail::to($request->email)->send(new OrderPlaced);
+//            Mail::send(new OrderPlaced);
+            Mail::send(new OrderPlaced($order));
+
+
             // SUCCESSFUL
             Cart::instance('default')->destroy();
             session()->forget('coupon');
 //            return back()->with('success_message', 'Thank you! Your payment has been successfully accepted!');
             return redirect()->route('confirmation.index')->with('success_message', 'Thank you! Your payment has been successfully accepted!');
         } catch (CardErrorException $e) {
-            back()->withErrors('Error! '. $e->getMessage());
+            $this->addToOrdersTables($request, $e->getMessage());
+            return back()->withErrors('Error! '. $e->getMessage());
         }
     }
 
@@ -132,6 +143,7 @@ class CheckoutController extends Controller
     {
         $tax = config('cart.tax') / 100;
         $discount = session()->get('coupon')['discount'] ?? 0;
+        $code = session()->get('coupon')['name'] ?? null;
         $newSubtotal = (Cart::subtotal() - $discount);
         $newTax = $newSubtotal * $tax;
         $newTotal = $newSubtotal * (1 + $tax);
@@ -139,9 +151,41 @@ class CheckoutController extends Controller
         return collect([
             'tax' => $tax,
             'discount' => $discount,
+            'code' => $code,
             'newSubtotal' => $newSubtotal,
             'newTax' => $newTax,
             'newTotal' => $newTotal,
         ]);
+    }
+
+    private function addToOrdersTables(Request $request, $error = null)
+    {
+        // Insert into orders table
+        $order = Order::create([
+            'user_id' => auth()->user() ? auth()->user()->id : null,
+            'billing_email' => $request->email,
+            'billing_name' => $request->name,
+            'billing_address' => $request->address,
+            'billing_city' => $request->city,
+            'billing_province' => $request->province,
+            'billing_postalcode' => $request->postalcode,
+            'billing_phone' => $request->phone,
+            'billing_name_on_card' => $request->name_on_card,
+            'billing_discount' => $this->getNumbers()->get('discount'),
+            'billing_discount_code' => $this->getNumbers()->get('code'),
+            'billing_subtotal' => $this->getNumbers()->get('newSubtotal'),
+            'billing_tax' => $this->getNumbers()->get('newTax'),
+            'billing_total' => $this->getNumbers()->get('newTotal'),
+            'error' => $error,
+        ]);
+        // Insert into order_product table
+        foreach (Cart::content() as $item) {
+            OrderProduct::create([
+                'order_id' => $order->id,
+                'product_id' => $item->model->id,
+                'quantity' => $item->qty,
+            ]);
+        }
+        return $order;
     }
 }

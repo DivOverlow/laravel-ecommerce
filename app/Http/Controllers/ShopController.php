@@ -57,4 +57,21 @@ class ShopController extends Controller
 
         return view('product', compact('product', 'mightAlsoLike'));
     }
+
+    public function search(Request $request)
+    {
+        $request->validate([
+            'query' => 'required|min:3',
+        ]);
+        $query = $request->input('query');
+//        $products = Product::where('name', 'like', "%$query%")->get();
+//        $products = Product::where('name', 'like', "%$query%")
+//                            ->orWhere('details', 'like', "%$query%")
+//                            ->orWhere('description', 'like', "%$query%")
+//                            ->paginate(10);
+
+          $products = Product::search($query)->paginate(10);
+        return view('search-results', compact('products'));
+    }
+
 }

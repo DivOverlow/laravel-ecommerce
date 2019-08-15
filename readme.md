@@ -73,7 +73,9 @@ The Laravel framework is open-source software licensed under the [MIT license](h
 
  git init
  git status
- 
+ git add .
+ git commit -m"P17 - Artisan Command for installing"
+  
 
 
 1. php artisan make:model Product -m
@@ -130,3 +132,12 @@ https://laravelvoyager.com/
     php artisan ecommerce:install
         (or)
     php artisan ecommerce:install --force
+    
+18. php artisan make:model Order -m
+    php artisan make:model OrederProduct -m
+    
+19. php artisan make:mail OrderPlaced
+    php artisan vendor:publish
+
+20. composer require nicolaslopezj/searchable
+    https://github.com/nicolaslopezj/searchable

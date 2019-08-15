@@ -7,14 +7,41 @@
 @endsection
 
 @section('content')
+    @component('components.breadcrumbs')
+        <a href="/">Home</a>
+        <i class="fa fa-chevron-right breadcrumbs-separator"></i>
+        <span>Shop</span>
+    @endcomponent
 
-    <div class="breadcrumbs">
-        <div class="container">
-            <a href="/">Home</a>
-            <i class="fa fa-chevron-right breadcrumb-separator"></i>
-            <span>Shop</span>
-        </div>
-    </div> <!-- end breadcrumbs -->
+
+
+{{--    <div class="breadcrumbs">--}}
+{{--        <div class="container">--}}
+{{--            <a href="/">Home</a>--}}
+{{--            <i class="fa fa-chevron-right breadcrumb-separator"></i>--}}
+{{--            <span>Shop</span>--}}
+{{--        </div>--}}
+{{--    </div> <!-- end breadcrumbs -->--}}
+
+    <div class="container">
+        @if (session()->has('success_message'))
+            <div class="spacer"></div>
+            <div class="alert alert-success">
+                {{ session()->get('success_message') }}
+            </div>
+        @endif
+
+        @if(count($errors) > 0)
+            <div class="spacer"></div>
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{!!  $error !!} </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+    </div>
 
     <div class="products-section container">
         <div class="sidebar">

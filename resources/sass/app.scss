@@ -19,6 +19,8 @@
 @import 'components/form';
 @import 'components/alerts';
 @import 'components/pagination';
+@import 'components/search';
+@import 'components/tables';
 
 // Layout
 @import 'layout/header';
@@ -30,4 +32,5 @@
 @import 'pages/product';
 @import 'pages/cart';
 @import 'pages/checkout';
+@import 'pages/search-results';
 @import 'pages/thankyou';
