@@ -1,9 +1,11 @@
 @extends('layout')
 
-@section('title', 'Search Results')
+@section('title', 'Search Results Algolia')
 
 @section('extra-css')
     <link rel="stylesheet" href="{{ asset('css/algolia.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.3.1/themes/reset-min.css" integrity="sha256-t2ATOGCtAIZNnzER679jwcFcKYfLlw01gli6F6oszk8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.3.1/themes/algolia-min.css" integrity="sha256-HB49n/BZjuqiCtQQf49OdZn63XuKFaxcIHWf0HNKte8=" crossorigin="anonymous">
 @endsection
 
 @section('content')
@@ -31,38 +33,37 @@
             </div>
         @endif
     </div>
+    <div class="container">
+        <example></example>
+        <div class="search-results-container-algolia">
+            <div>
+                <h2>Search</h2>
+                <div id="search-box">
+                    <!-- searchBox widget will appear here -->
+                </div>
 
-    <div class="search-results-container container">
-        <h1>Search Results</h1>
-        <p class="search-results-count">{{ $products->total() }} result(s) for '{{ request()->input('query') }}'</p>
-{{--        <p class="search-results-count">{{ $products->count() }} result(s) for '{{ request()->input('query') }}'</p>--}}
+                <div id="stats">
+                    <!-- Stats widget will appear here -->
+                </div>
 
-        @if ($products->total() > 0)
-{{--        @if ($products->count() > 0)--}}
-            <table class="table table-bordered table-striped">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Details</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach ($products as $product)
-                    <tr>
-                        <th><a href="{{ route('shop.show', $product->slug) }}">{{ $product->name }}</a></th>
-                        <td>{{ $product->details }}</td>
-                        <td>{{ str_limit($product->description, 80) }}</td>
-                        <td>{{ $product->presentPrice() }}</td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+                <h2>Categories</h2>
+                <div id="refinement-list">
+                    <!-- category widget will appear here -->
+                </div>
+            </div>
+            <div>
+                <h2>Search Results</h2>
+                <div id="hits">
+                    <!-- Hits widget will appear here -->
+                </div>
 
-            {{ $products->appends(request()->input())->links() }}
-        @endif
-    </div> <!-- end search-results-container -->
+                <div id="pagination">
+                    <!-- Pagination widget will appear here -->
+                </div>
+            </div>
+        </div> <!-- end search-results-container -->
+    </div>
+
 
 @endsection
 
@@ -71,4 +72,9 @@
     <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
     <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
     <script src="{{asset('js/algolia.js')}}"></script>
+{{--    <script src="https://cdn.jsdelivr.net/npm/algoliasearch@3.33.0/dist/algoliasearchLite.min.js" integrity="sha256-3Laj91VXexjTlFLgL8+vvIq27laXdRmFIcO2miulgEs=" crossorigin="anonymous"></script>--}}
+    <script src="https://cdn.jsdelivr.net/npm/algoliasearch@3.33.0/dist/algoliasearchLite.min.js" integrity="sha256-3Laj91VXexjTlFLgL8+vvIq27laXdRmFIcO2miulgEs=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@3.4.0/dist/instantsearch.production.min.js" integrity="sha256-pM0n88cBFRHpSn0N26ETsQdwpA7WAXJDvkHeCLh3ujI=" crossorigin="anonymous"></script>
+    <script src="{{asset('js/algolia-instantsearch.js')}}"></script>
+    <script src="{{asset('js/app.js')}}"></script>
 @endsection
