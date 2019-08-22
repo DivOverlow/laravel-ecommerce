@@ -75,6 +75,7 @@ The Laravel framework is open-source software licensed under the [MIT license](h
  git status
  git add .
  git commit -m"P17 - Artisan Command for installing"
+ git push
   
 
 
@@ -141,3 +142,20 @@ https://laravelvoyager.com/
 
 20. composer require nicolaslopezj/searchable
     https://github.com/nicolaslopezj/searchable
+
+21. composer require laravel/scout
+    composer require algolia/algoliasearch-client-php:^2.2
+    
+22. php artisan tinker
+    >>> App\Product::find(1)->categories
+    >>> App\Product::find(1)->categories->pluck('name')->toArray()
+    22. php artisan ecommerce:install
+
+23. git checkout -b vue-algolia
+                  
+25.
+    git commit -m"P25 - Fix. Don't allow negative totals in checkout"
+    git push
+    php artisan make:listener CartUpdateListener
+    php artisan make:job UpdateCoupon
+    

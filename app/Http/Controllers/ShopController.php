@@ -74,4 +74,9 @@ class ShopController extends Controller
         return view('search-results', compact('products'));
     }
 
+    public function searchAlgolia(Request $request)
+    {
+        return view('search-results-algolia');
+    }
+
 }

@@ -41,7 +41,7 @@ class EcommerceInstall extends Command
         if ($this->option('force')) {
             $this->proceed();
         } else {
-            if ($this->confirm('This will delete All your current data and install the default dummy data. Are you sure?')) {
+            if ($this->confirm('This will delete ALL your current data and install the default dummy data. Are you sure?')) {
                 $this->proceed();
             }
         }
@@ -49,64 +49,102 @@ class EcommerceInstall extends Command
 
     protected function proceed()
     {
-        File::deleteDirectory(public_path('storage/products/dummy'));
-//        $this->call('storage:link');
+        File::deleteDirectory(public_path('storage/products'));
+        File::deleteDirectory(public_path('storage/settings'));
+        File::deleteDirectory(public_path('storage/pages'));
+        File::deleteDirectory(public_path('storage/posts'));
+        File::deleteDirectory(public_path('storage/users'));
+
         $this->callSilent('storage:link');
         $copySuccess = File::copyDirectory(public_path('img/products'), public_path('storage/products/dummy'));
         if ($copySuccess) {
-            $this->info('Images successfully copied to store folder.');
+            $this->info('Images successfully copied to storage folder.');
         }
 
-        $this->call('migrate:fresh', [
-            '--seed' => true,
-            '--force' => true,
-        ]);
+        File::copyDirectory(public_path('img/pages'), public_path('storage/pages'));
+        File::copyDirectory(public_path('img/posts'), public_path('storage/posts'));
+        File::copyDirectory(public_path('img/users'), public_path('storage/users'));
+
+        try {
+            $this->call('migrate:fresh', [
+                '--seed' => true,
+                '--force' => true,
+            ]);
+        } catch (\Exception $e) {
+            $this->error('Algolia credentials incorrect. Your products table is NOT seeded correctly. If you are not using Algolia, remove Laravel\Scout\Searchable from App\Product');
+        }
+
         $this->call('db:seed', [
             '--class' => 'VoyagerDatabaseSeeder',
+            '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'VoyagerDummyDatabaseSeeder',
+            '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'DataTypesTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'DataRowsTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'MenusTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'MenuItemsTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'RolesTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'PermissionsTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'PermissionRoleTableSeeder',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'PermissionRoleTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'UsersTableSeederCustom',
             '--force' => true,
         ]);
+
         $this->call('db:seed', [
             '--class' => 'SettingsTableSeederCustom',
             '--force' => true,
         ]);
+
+        try {
+            $this->call('scout:clear', [
+                'model' => 'App\\Product',
+            ]);
+
+            $this->call('scout:import', [
+                'model' => 'App\\Product',
+            ]);
+        } catch (\Exception $e) {
+            $this->error('Algolia credentials incorrect. Check your .env file. Make sure ALGOLIA_APP_ID and ALGOLIA_SECRET are correct.');
+        }
 
         $this->info('Dummy data installed');
     }
