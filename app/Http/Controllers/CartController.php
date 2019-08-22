@@ -19,7 +19,12 @@ class CartController extends Controller
     {
 //        $mightAlsoLike = Product::where('slug', '!=', $slug)->inRandomOrder()->take(4)->get();
         $mightAlsoLike = Product::mightAlsoLike()->get();
-        return view('cart', compact( 'mightAlsoLike'));
+        return view('cart', compact( 'mightAlsoLike'))->with([
+            'discount' => getNumbers()->get('discount'),
+            'newSubtotal' => getNumbers()->get('newSubtotal'),
+            'newTax' => getNumbers()->get('newTax'),
+            'newTotal' => getNumbers()->get('newTotal'),
+        ]);
     }
 
     /**

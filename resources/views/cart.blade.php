@@ -83,19 +83,49 @@
 
             </div> <!-- end cart-table -->
 
+            @if (! session()->has('coupon'))
+
+                <a href="#" class="have-code">Have a Code?</a>
+
+                <div class="have-code-container">
+                    <form action="{{ route('coupon.store') }}" method="POST">
+                        {{ csrf_field() }}
+                        <input type="text" name="coupon_code" id="coupon_code">
+                        <button type="submit" class="button button-plain">Apply</button>
+                    </form>
+                </div> <!-- end have-code-container -->
+            @endif
+
             <div class="cart-totals">
                 <div class="cart-totals-left">
                     Shipping is free because we’re awesome like that. Also because that’s additional stuff I don’t feel like figuring out :).
                 </div>
 
                 <div class="cart-totals-right">
-                    <div>
+                    <div class="checkout-totals-left">
                         Subtotal <br>
+                        @if (session()->has('coupon'))
+                            Code ({{ session()->get('coupon')['name'] }})
+                            <form action="{{ route('coupon.destroy') }}" method="POST" style="display:inline">
+                                {{ csrf_field() }}
+                                {{ method_field('delete') }}
+                                <button type="submit" style="font-size:14px">Remove</button>
+                            </form>
+                            <br>
+                            <hr>
+                            New Subtotal <br>
+                        @endif
                         Tax ({{config('cart.tax')}}%)<br>
-                        <span class="cart-totals-total">Total</span>
+                        <span class="cart-totals-total">Total </span>
+
                     </div>
                     <div class="cart-totals-subtotal">
                         {{ presentPrice(Cart::subtotal()) }} <br>
+                        @if (session()->has('coupon'))
+                            -{{ presentPrice($discount) }} <br>
+                            <hr>
+                            {{ presentPrice($newSubtotal) }} <br>
+                        @endif
                         {{ presentPrice(Cart::tax()) }} <br>
                         <span class="cart-totals-total">{{ presentPrice(Cart::total()) }}</span>
                     </div>
