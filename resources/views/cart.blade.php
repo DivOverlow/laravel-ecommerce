@@ -102,7 +102,7 @@
                 </div>
 
                 <div class="cart-totals-right">
-                    <div class="checkout-totals-left">
+                    <div class="cart-totals-left">
                         Subtotal <br>
                         @if (session()->has('coupon'))
                             Code ({{ session()->get('coupon')['name'] }})
@@ -122,12 +122,12 @@
                     <div class="cart-totals-subtotal">
                         {{ presentPrice(Cart::subtotal()) }} <br>
                         @if (session()->has('coupon'))
-                            -{{ presentPrice($discount) }} <br>
+                            -{{ presentPrice($discount) }} <br><br>
                             <hr>
                             {{ presentPrice($newSubtotal) }} <br>
                         @endif
                         {{ presentPrice(Cart::tax()) }} <br>
-                        <span class="cart-totals-total">{{ presentPrice(Cart::total()) }}</span>
+                        <span class="cart-totals-total">{{ presentPrice($newTotal) }}</span>
                     </div>
                 </div>
             </div> <!-- end cart-totals -->
