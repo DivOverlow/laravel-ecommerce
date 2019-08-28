@@ -159,3 +159,14 @@ https://laravelvoyager.com/
     php artisan make:listener CartUpdateListener
     php artisan make:job UpdateCoupon
     
+27 php artisan make:migration add_quantity_to_products_table --table=products
+    php artisan migrate
+    php artisan ecommerce:install
+    
+31 php artisan make:controller UsersController -r
+   php artisan make:controller OrdersController -r
+   
+32 PayPal
+   composer require braintree/braintree_php
+         
+

@@ -6,6 +6,7 @@ use App\Http\Requests\CheckoutRequest;
 use App\Mail\OrderPlaced;
 use App\Order;
 use App\OrderProduct;
+use App\Product;
 use Cart;
 use Cartalyst\Stripe\Exception\CardErrorException;
 use Cartalyst\Stripe\Laravel\Facades\Stripe;
@@ -29,7 +30,20 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.index');
         }
 
+        $gateway = new \Braintree\Gateway([
+            'environment' => config('services.braintree.environment'),
+            'merchantId' => config('services.braintree.merchantId'),
+            'publicKey' => config('services.braintree.publicKey'),
+            'privateKey' => config('services.braintree.privateKey')
+        ]);
+        try {
+            $paypalToken = $gateway->ClientToken()->generate();
+        } catch (\Exception $e) {
+            $paypalToken = null;
+        }
+
         return view('checkout')->with([
+            'paypalToken' => $paypalToken,
             'discount' => getNumbers()->get('discount'),
             'newSubtotal' => getNumbers()->get('newSubtotal'),
             'newTax' => getNumbers()->get('newTax'),
@@ -57,6 +71,11 @@ class CheckoutController extends Controller
     {
 //        dd($request->all());
 
+        // Check race condition when there are less items available to purchase
+        if ($this->productsAreNoLongerAvailable()) {
+            return back()->withErrors('Sorry! One of the items in your cart is not longer available.');
+        }
+
         // foreach
         $contents = Cart::content()->map(function ($item) {
            return $item->model->slug . ', ' . $item->qty;
@@ -82,6 +101,8 @@ class CheckoutController extends Controller
 //            Mail::send(new OrderPlaced);
             Mail::send(new OrderPlaced($order));
 
+            // decrease the quantities of all products in the cart
+            $this->decreaseQuantities();
 
             // SUCCESSFUL
             Cart::instance('default')->destroy();
@@ -91,6 +112,55 @@ class CheckoutController extends Controller
         } catch (CardErrorException $e) {
             $this->addToOrdersTables($request, $e->getMessage());
             return back()->withErrors('Error! '. $e->getMessage());
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function paypalCheckout(Request $request)
+    {
+        // Check race condition when there are less items available to purchase
+        if ($this->productsAreNoLongerAvailable()) {
+            return back()->withErrors('Sorry! One of the items in your cart is no longer avialble.');
+        }
+        $gateway = new \Braintree\Gateway([
+            'environment' => config('services.braintree.environment'),
+            'merchantId' => config('services.braintree.merchantId'),
+            'publicKey' => config('services.braintree.publicKey'),
+            'privateKey' => config('services.braintree.privateKey')
+        ]);
+        $nonce = $request->payment_method_nonce;
+        $result = $gateway->transaction()->sale([
+            'amount' => round(getNumbers()->get('newTotal') / 100, 2),
+            'paymentMethodNonce' => $nonce,
+            'options' => [
+                'submitForSettlement' => true
+            ]
+        ]);
+        $transaction = $result->transaction;
+        if ($result->success) {
+            $order = $this->addToOrdersTablesPaypal(
+                $transaction->paypal['payerEmail'],
+                $transaction->paypal['payerFirstName'].' '.$transaction->paypal['payerLastName'],
+                null
+            );
+            Mail::send(new OrderPlaced($order));
+            // decrease the quantities of all the products in the cart
+            $this->decreaseQuantities();
+            Cart::instance('default')->destroy();
+            session()->forget('coupon');
+            return redirect()->route('confirmation.index')->with('success_message', 'Thank you! Your payment has been successfully accepted!');
+        } else {
+            $order = $this->addToOrdersTablesPaypal(
+                $transaction->paypal['payerEmail'],
+                $transaction->paypal['payerFirstName'].' '.$transaction->paypal['payerLastName'],
+                $result->message
+            );
+            return back()->withErrors('An error occurred with the message: '.$result->message);
         }
     }
 
@@ -190,5 +260,25 @@ class CheckoutController extends Controller
             ]);
         }
         return $order;
+    }
+
+    protected function decreaseQuantities()
+    {
+        foreach (Cart::content() as $item) {
+            $product = Product::find($item->model->id);
+
+            $product->update(['quantity' => $product->quantity - $item->qty]);
+        }
+    }
+
+    protected function productsAreNoLongerAvailable()
+    {
+        foreach (Cart::content() as $item) {
+            $product = Product::find($item->model->id);
+            if ($product->quantity < $item->qty) {
+                return true;
+            }
+        }
+        return false;
     }
 }

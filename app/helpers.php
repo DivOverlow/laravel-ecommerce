@@ -1,9 +1,16 @@
 <?php
 
+use Carbon\Carbon;
+
 function presentPrice($price)
 {
 //    return money_format('$%i', $price / 100);
     return '$' . number_format($price / 100, 2);
+}
+
+function presentDate($date)
+{
+    return Carbon::parse($date)->format('M d, Y');
 }
 
 function setActiveCategory($category, $output = 'active')
@@ -36,4 +43,17 @@ function getNumbers()
         'newTax' => $newTax,
         'newTotal' => $newTotal,
     ]);
+}
+
+function getStockLevel($quantity)
+{
+    if ($quantity > setting('site.stock_threshold')) {
+        $stockLevel = '<div class="badge badge-success">In Stock</div>';
+    }  elseif ($quantity <= setting('site.stock_threshold') && $quantity > 0){
+        $stockLevel = '<div class="badge badge-warning">Low Stock</div>';
+    } else {
+        $stockLevel = '<div class="badge badge-danger">Not available</div>';
+    }
+
+    return $stockLevel;
 }

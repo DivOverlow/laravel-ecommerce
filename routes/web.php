@@ -36,6 +36,7 @@ Route::post('/saveForLater/switchToCart/{product}', 'SaveForLaterController@swit
 
 Route::get('/checkout', 'CheckoutController@index')->name('checkout.index')->middleware('auth');
 Route::post('/checkout', 'CheckoutController@store')->name('checkout.store');
+Route::post('/paypal-checkout', 'CheckoutController@paypalCheckout')->name('checkout.paypal');
 
 Route::get('/guestCheckout', 'CheckoutController@index')->name('guestCheckout.index');
 
@@ -61,6 +62,14 @@ Route::get('/search', 'ShopController@search')->name('search');
 
 Route::get('/search-algolia', 'ShopController@searchAlgolia')->name('search-algolia');
 
+
+Route::middleware('auth')->group( function () {
+    Route::get('/my-profile', 'UsersController@edit')->name('users.edit');
+    Route::patch('/my-profile', 'UsersController@update')->name('users.update');
+
+    Route::get('/my-orders', 'OrdersController@index')->name('orders.index');
+    Route::get('/my-orders/{order}', 'OrdersController@show')->name('orders.show');
+});
 
 Route::get('/mailable', function() {
    $order = App\Order::find(1);

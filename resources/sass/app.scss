@@ -21,6 +21,7 @@
 @import 'components/pagination';
 @import 'components/search';
 @import 'components/tables';
+@import "components/badge";
 
 // Layout
 @import 'layout/header';
@@ -36,3 +37,5 @@
 @import 'pages/search-results';
 @import 'pages/search-results-algolia';
 @import 'pages/auth';
+@import 'pages/my-profile';
+@import 'pages/my-orders';
